@@ -7,7 +7,7 @@ records = [
     {"description": "uber ride", "amount": -5},
     {"description": "food court", "amount": -5},
     {"description": "freelance income", "amount": 50},
-    {"description": "tv subscription", "amount": -5},
+    {"description": "tv subscription", "amount": -5.5},
 ]
 
 def post_to_microservice(endpoint, data):
@@ -23,4 +23,3 @@ print(post_to_microservice("classify/purpose", records))
 
 print("\nClassify Duration:")
 print(post_to_microservice("classify/duration", records))
-

@@ -5,14 +5,16 @@ app = Flask(__name__)
 # Modifiable lists to add keywords and possible labels
 purpose_key = [
     (["rent", "apartment", "house"], "Housing"),
-    (["food"], "Food"),
-    (["uber", "lyft", "transport"], "Transport"),
-    (["tv", "entertainment", "game"], "Entertainment"),
+    (["food", "eat"], "Food"),
+    (["uber", "lyft", "transport", "car"], "Transport"),
+    (["tv", "entertainment", "game", "fun"], "Entertainment"),
+    (["school", "tuition", "book"], "Education"),
 ]
 
 duration_key = [
     (["month"], "Monthly"),
-    (["uber"], "Transport"),
+    (["week"], "Weekly"),
+    (["single", "one-time", "once"], "One-Time"),
 ]
 
 port = 11111
@@ -71,4 +73,4 @@ def classify_duration_route():
     return jsonify(classify(records, duration_key))
 
 if __name__ == "__main__":
-    app.run(host = "localhost", port = port)
+    app.run(host = 0, port = port)
