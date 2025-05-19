@@ -15,12 +15,12 @@ def post_to_microservice(endpoint, data):
     response = requests.post(url, json = {"records": data})
     return response.json()
 
-print("Summary:\n")
+print("Summary:")
 print(post_to_microservice("summary", records))
 
-print("\nClassify Purpose:\n")
+print("\nClassify Purpose:")
 print(post_to_microservice("classify/purpose", records))
 
-print("\nClassify Duration:\n")
+print("\nClassify Duration:")
 print(post_to_microservice("classify/duration", records))
 
