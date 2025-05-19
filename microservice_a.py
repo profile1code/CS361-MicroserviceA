@@ -71,4 +71,4 @@ def classify_duration_route():
     return jsonify(classify(records, duration_key))
 
 if __name__ == "__main__":
-    app.run(host = "localhost", port = port, threaded = True)
+    app.run(host = "localhost", port = port)
