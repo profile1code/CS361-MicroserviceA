@@ -1,11 +1,27 @@
-import socket
-import json
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Modifiable lists to add keywords and possible labels
+purpose_key = [
+    (["rent", "apartment", "house"], "Housing"),
+    (["food"], "Food"),
+    (["uber", "lyft", "transport"], "Transport"),
+    (["tv", "entertainment", "game"], "Entertainment"),
+]
+
+duration_key = [
+    (["month"], "Monthly"),
+    (["uber"], "Transport"),
+]
 
 port = 11111
 
 def summarize(records):
+    """This function takes a list of financial records and returns a summary of 
+    income, expense and net spending."""
     income, expense = 0, 0
-    for record in range(len(records)):
+    for record in records:
         if record["amount"] > 0:
             income += record["amount"]
         else:
@@ -16,74 +32,43 @@ def summarize(records):
         "netSpending": income + expense
     }
 
-def classify_purpose(records):
+def classify(records, key_list):
+    """This function takes a list of records and classifies each record by the given list."""
     result = []
     for record in records:
-        description = record.get("description", "").lower()
-        if "rent" in description:
-            label = "Housing"
-        elif "food" in description:
-            label = "Food"
-        elif "uber" in description or "lyft" or "car" in description:
-            label = "Transport"
-        else:
-            label = "Other"
+        description = record["description"].lower()
+        label = "Other"
+        found = False
+        for keys, value in key_list:  # Go through each of the key pairs given in parameter
+            for key in keys:
+                if key in description:
+                    label = value
+                    found = True
+                    break  # Once 1 value found, just break
+            if found:
+                break
         new_record = record.copy()
         new_record["classification"] = label
         result.append(new_record)
     return result
 
-def classify_duration(records):
-    result = []
-    # for record in records:
-        
-        # IMPLEMENT LOGIC HERE, NEED TO FIGURE OUT
+@app.route("/summary", methods=["POST"])
+def summary_route():
+    data = request.get_json()
+    records = data.get("records", [])
+    return jsonify(summarize(records))
 
-        # new_record = record.copy()
-        # new_record["classification"] = label
-        # result.append(new_record)
-    return result
+@app.route("/classify/purpose", methods=["POST"])
+def classify_purpose_route():
+    data = request.get_json()
+    records = data.get("records", [])
+    return jsonify(classify(records, purpose_key))
 
-def listen(listener_socket):
-    connection, address = listener_socket.accept()
-    print(f"Connected on {address}")
+@app.route("/classify/duration", methods=["POST"])
+def classify_duration_route():
+    data = request.get_json()
+    records = data.get("records", [])
+    return jsonify(classify(records, duration_key))
 
-    run = True
-    while run:
-        data = connection.recv(2048).decode()
-        if not data:
-            continue
-
-        print("Listener received:", data)
-
-        if data == "quit":
-            connection.close()
-            listen(listener_socket)
-            return
-        elif data == "close":
-            connection.close()
-            run = False
-            break
-
-        data = json.loads(data)
-        action = data["action"]
-        records = data.get("records", [])
-
-        if action == "summary":
-            response = summarize(records)
-        elif action == "classify_purpose":
-            response = classify_purpose(records)
-        elif action == "classify_duration":
-            response = classify_duration(records)
-        else:
-            response = {"error": "Unknown action"}
-
-        connection.send(json.dumps(response).encode())
-
-
-# Setup
-listener_socket = socket.socket()
-listener_socket.bind((socket.gethostname(), port))
-listener_socket.listen(1)
-listen(listener_socket)
-listener_socket.close()
+if __name__ == "__main__":
+    app.run(host = "localhost", port = port, threaded = True)
